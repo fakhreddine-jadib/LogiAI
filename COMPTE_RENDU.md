@@ -178,3 +178,12 @@ La page affiche :
 Conclusion : les origines CORS sont correctement limitées.
 L'authentification reste nécessaire indépendamment de CORS.
 
+
+## Atelier 6 — Faire de LogiAI un package
+
+- **Étape 1 (Problème d'import hors du dossier)** : « Pour utiliser LogiAI, mon collègue doit se placer manuellement à la racine du projet (ou ajouter le dossier au `PYTHONPATH`), car `logiai` n'est pas installé comme un package dans l'environnement Python. »
+- **Étape 4 (`pluie_mm = 500`)** : La commande `logiai-predict` accepte l'entrée et affiche `Probabilité de retard: 100% (ALERTE)`, car la CLI lit directement le JSON brut sans validation des bornes métier. À l'inverse, l'API (`POST /v1/predict`) rejette la requête avec un statut HTTP `422 Unprocessable Entity` car le schéma Pydantic impose `0 <= pluie_mm <= 100`.
+- **Étape 5 (Installation du wheel dans un dossier vide)** :
+  1. Sans `LOGIAI_HOME`, le premier lancement échoue avec une erreur `FileNotFoundError` sur `models/model.joblib` (le modèle n'est pas embarqué dans le `.whl` et `ROOT` pointe par défaut vers le répertoire courant vide).
+  2. Après définition de `LOGIAI_HOME` vers la racine du projet, `logiai-predict` charge le modèle et affiche `Probabilité de retard: 73% (ALERTE)`.
+- **Étape 6 (Chemin du package dans le conteneur Docker)** : `/usr/local/lib/python3.11/site-packages/logiai/__init__.py` (le répertoire source `/app/logiai` a été supprimé de l'image).
